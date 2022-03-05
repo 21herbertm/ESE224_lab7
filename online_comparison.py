@@ -35,16 +35,21 @@ the score function is nothing more than the norm of a multiplication of DFTs. We
         voicerecording = sd.rec(int(T * fs), fs, 1)
         sd.wait()  # Wait until recording is finished
         rec_i = voicerecording.astype(np.float32)
+        """
+        Note that numpy.float is just an alias to Python's float type. It is not a numpy scalar type like numpy.float64. 
+        The name is only exposed for backwards compatibility with a very early version of numpy that inappropriately
+        exposed numpy.float64 as numpy.float, causing problems when people did from numpy import
+        """
         rec_i=rec_i[:,0]
 
         # We can use the norm of the ith signal to normalize its DFT
         energy_rec_i = np.linalg.norm(rec_i)
         rec_i /= energy_rec_i
         # Comparisons
-        inner_prods = np.zeros(numberDigits)
+        inner_product = np.zeros(numberDigits)
 
         for x in range(numberDigits):
-            inner_prods[j] = np.linalg.norm(np.convolve(rec_i , average_signal[j, :]))**2
+            inner_product[j] = np.linalg.norm(np.convolve(rec_i , average_signal[j, :]))**2
 
 # PRINTS OUT THE INNER PRODUCTS
-        print('The number said is:', np.argmax(inner_prods) + 1)
+        print('The number said is:', np.argmax(inner_product) + 1)

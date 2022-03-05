@@ -1,7 +1,6 @@
 """
-@author: Juan Cervino
-This function computes the online prediction of spoken digits by comparing their spectra
-against the average spectrum of the training set stored in "spoken_digits_DFTs.npy".
+ONLINE COMPARISON FILE
+
 """
 import numpy as np
 from idft import idft
@@ -16,20 +15,23 @@ if __name__ == '__main__':
     training_set_DFTs = np.load("spoken_digits_DFTs.npy")
 
     # Average spectra
-    num_digits = len(training_set_DFTs)
-    _, N = training_set_DFTs[0].shape
-    average_spectra = np.zeros((num_digits, N), dtype=np.complex_)
-    average_signal = np.zeros((num_digits, N), dtype=np.complex_)
+    numberDigits = len(training_set_DFT_values)
+    _, N = training_set_DFT_values[0].shape
+    average_spectra = np.zeros((numberDigits, N), dtype=np.complex_)
+    average_signal = np.zeros((numberDigits, N), dtype=np.complex_)
 
-    for i in range(num_digits):
+# LOOPS THROUGH ALL VALUES TO GET THE AVERAGE OF MODULUS OF SPECTRA
+    for i in range(numberDigits):
         # Average of modulus of spectra
         average_spectra[i, :] = np.mean(np.absolute(training_set_DFTs[i]), axis=0)
         iDFT = idft(average_spectra[i, :], fs, N)
         y_demod, Treal = iDFT.solve_ifft()
         average_signal[i, :] = y_demod
+"""
+the score function is nothing more than the norm of a multiplication of DFTs. We can implement the score functions
+"""
 
-
-    for t in range(time_slots):
+    for m in range(time_slots):
         voicerecording = sd.rec(int(T * fs), fs, 1)
         sd.wait()  # Wait until recording is finished
         rec_i = voicerecording.astype(np.float32)
@@ -39,9 +41,10 @@ if __name__ == '__main__':
         energy_rec_i = np.linalg.norm(rec_i)
         rec_i /= energy_rec_i
         # Comparisons
-        inner_prods = np.zeros(num_digits)
+        inner_prods = np.zeros(numberDigits)
 
-        for j in range(num_digits):
+        for x in range(numberDigits):
             inner_prods[j] = np.linalg.norm(np.convolve(rec_i , average_signal[j, :]))**2
 
+# PRINTS OUT THE INNER PRODUCTS
         print('The number said is:', np.argmax(inner_prods) + 1)
